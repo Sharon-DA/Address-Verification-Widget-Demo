@@ -1,8 +1,3 @@
-/**
- * AddressVerificationWidget
- * Standalone, zero-dependency Vanilla JavaScript address verification component.
- * Supports Nigeria (NIPOST), US (USPS), UK, and International address formats.
- */
 
 class AddressVerificationWidget {
   /**
@@ -43,20 +38,20 @@ class AddressVerificationWidget {
 
     // Loading step sequence
     this.loadingSteps = [
-      { id: 'format',   label: 'Street address format',   detail: 'Standardizing to postal conventions...' },
-      { id: 'lookup',   label: 'City and state lookup',   detail: 'Querying location master files...' },
-      { id: 'postal',   label: 'Postal code registry',    detail: 'Validating delivery point...' }
+      { id: 'format', label: 'Street address format', detail: 'Standardizing to postal conventions...' },
+      { id: 'lookup', label: 'City and state lookup', detail: 'Querying location master files...' },
+      { id: 'postal', label: 'Postal code registry', detail: 'Validating delivery point...' }
     ];
     this.activeStepIndex = 0;
     this.stepTimer = null;
 
     // Presets database
     this.presets = {
-      lagos:    { street: '15 Commercial Avenue', unit: 'Suite 3B', city: 'Yaba', state: 'Lagos', zipcode: '100001', country: 'NG' },
-      abuja:    { street: '42 Ahmadu Bello Way', unit: 'Floor 4', city: 'Central Business District', state: 'Abuja', zipcode: '900001', country: 'NG' },
-      newyork:  { street: '350 Fifth Avenue', unit: 'Floor 102', city: 'New York', state: 'New York', zipcode: '10118', country: 'US' },
-      london:   { street: '10 Downing Street', unit: '', city: 'London', state: 'England', zipcode: 'SW1A 2AA', country: 'UK' },
-      random:   { street: '742 Evergreen Terrace', unit: 'Apt 1B', city: 'Springfield', state: 'Oregon', zipcode: '97477', country: 'US' }
+      lagos: { street: '15 Commercial Avenue', unit: 'Suite 3B', city: 'Yaba', state: 'Lagos', zipcode: '100001', country: 'NG' },
+      abuja: { street: '42 Ahmadu Bello Way', unit: 'Floor 4', city: 'Central Business District', state: 'Abuja', zipcode: '900001', country: 'NG' },
+      newyork: { street: '350 Fifth Avenue', unit: 'Floor 102', city: 'New York', state: 'New York', zipcode: '10118', country: 'US' },
+      london: { street: '10 Downing Street', unit: '', city: 'London', state: 'England', zipcode: 'SW1A 2AA', country: 'UK' },
+      random: { street: '742 Evergreen Terrace', unit: 'Apt 1B', city: 'Springfield', state: 'Oregon', zipcode: '97477', country: 'US' }
     };
 
     // Simulated postal database
@@ -126,8 +121,8 @@ class AddressVerificationWidget {
 
     switch (this.currentState) {
       case 'initiation': content.appendChild(this._renderInitiation()); break;
-      case 'loading':    content.appendChild(this._renderLoading());    break;
-      case 'result':     content.appendChild(this._renderResult());     break;
+      case 'loading': content.appendChild(this._renderLoading()); break;
+      case 'result': content.appendChild(this._renderResult()); break;
     }
 
     innerCard.appendChild(content);
@@ -149,7 +144,7 @@ class AddressVerificationWidget {
   //  Top Stepper Progress Bar (Step 1, 2, 3)
   // ─────────────────────────────────────────────
   _renderStepper() {
-    const steps  = [
+    const steps = [
       { num: 1, label: 'Enter Address' },
       { num: 2, label: 'Verifying' },
       { num: 3, label: 'Complete' }
@@ -162,26 +157,26 @@ class AddressVerificationWidget {
     el.innerHTML = `
       <div class="avw-stepper">
         ${steps.map((step, i) => {
-          const done    = i < active;
-          const current = i === active;
-          const cls     = done ? 'avw-step avw-step-done' : current ? 'avw-step avw-step-active' : 'avw-step';
+      const done = i < active;
+      const current = i === active;
+      const cls = done ? 'avw-step avw-step-done' : current ? 'avw-step avw-step-active' : 'avw-step';
 
-          const circleContent = done
-            ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
-            : `<span>${step.num}</span>`;
+      const circleContent = done
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+        : `<span>${step.num}</span>`;
 
-          const connector = i < steps.length - 1
-            ? `<div class="avw-connector ${done ? 'avw-connector-done' : current ? 'avw-connector-half' : ''}"></div>`
-            : '';
+      const connector = i < steps.length - 1
+        ? `<div class="avw-connector ${done ? 'avw-connector-done' : current ? 'avw-connector-half' : ''}"></div>`
+        : '';
 
-          return `
+      return `
             <div class="${cls}">
               <div class="avw-step-circle">${circleContent}</div>
               <span class="avw-step-label">${step.label}</span>
             </div>
             ${connector}
           `;
-        }).join('')}
+    }).join('')}
       </div>
     `;
 
@@ -489,7 +484,7 @@ class AddressVerificationWidget {
   // ─────────────────────────────────────────────
   _renderResult() {
     const fragment = document.createDocumentFragment();
-    const result     = this.verificationResult;
+    const result = this.verificationResult;
     const isVerified = result && result.verified;
 
     const wrapper = document.createElement('div');
@@ -594,9 +589,9 @@ class AddressVerificationWidget {
     fragment.appendChild(wrapper);
 
     setTimeout(() => {
-      const r  = this.container.querySelector('#avw-reset-btn');
-      const e  = this.container.querySelector('#avw-edit-btn');
-      const u  = this.container.querySelector('#avw-use-btn');
+      const r = this.container.querySelector('#avw-reset-btn');
+      const e = this.container.querySelector('#avw-edit-btn');
+      const u = this.container.querySelector('#avw-use-btn');
       if (r) r.addEventListener('click', () => this.reset());
       if (e) e.addEventListener('click', () => this.transitionToState('initiation'));
       if (u) {
@@ -627,15 +622,15 @@ class AddressVerificationWidget {
 
   validateFormData() {
     this.validationErrors = {};
-    const s = (this.formData.street  || '').trim();
-    const c = (this.formData.city    || '').trim();
-    const t = (this.formData.state   || '').trim();
+    const s = (this.formData.street || '').trim();
+    const c = (this.formData.city || '').trim();
+    const t = (this.formData.state || '').trim();
     const z = (this.formData.zipcode || '').trim();
 
-    if (!s || s.length < 3)    this.validationErrors.street  = 'Enter a valid street address.';
-    if (!c)                    this.validationErrors.city    = 'City / Town is required.';
-    if (!t)                    this.validationErrors.state   = 'State / Region is required.';
-    if (!z)                    this.validationErrors.zipcode = 'Postal code is required.';
+    if (!s || s.length < 3) this.validationErrors.street = 'Enter a valid street address.';
+    if (!c) this.validationErrors.city = 'City / Town is required.';
+    if (!t) this.validationErrors.state = 'State / Region is required.';
+    if (!z) this.validationErrors.zipcode = 'Postal code is required.';
     else if (z.length < 4 || z.length > 10) this.validationErrors.zipcode = 'Enter a valid postal code.';
 
     return Object.keys(this.validationErrors).length === 0;
@@ -670,9 +665,9 @@ class AddressVerificationWidget {
   }
 
   computeVerificationResult() {
-    const street  = (this.formData.street  || '').toLowerCase().trim();
-    const zip     = (this.formData.zipcode || '').trim();
-    const state   = (this.formData.state   || '').trim();
+    const street = (this.formData.street || '').toLowerCase().trim();
+    const zip = (this.formData.zipcode || '').trim();
+    const state = (this.formData.state || '').trim();
     const country = (this.formData.country || 'NG').toUpperCase();
 
     // Explicit unverified triggers
@@ -682,7 +677,7 @@ class AddressVerificationWidget {
 
     // Match mock database
     const match = this.mockDatabase.find(item => {
-      const words       = item.street.toLowerCase().split(' ');
+      const words = item.street.toLowerCase().split(' ');
       const streetMatch = words.some(w => w.length > 3 && street.includes(w));
       return item.zipcode === zip && streetMatch;
     });
@@ -691,8 +686,8 @@ class AddressVerificationWidget {
 
     // Generic standardized result
     const countryNames = { NG: 'NIGERIA', US: 'UNITED STATES', UK: 'UNITED KINGDOM', CA: 'CANADA', DE: 'GERMANY' };
-    const countryName  = countryNames[country] || country;
-    const stdStreet    = this._standardiseStreet(this.formData.street, this.formData.unit);
+    const countryName = countryNames[country] || country;
+    const stdStreet = this._standardiseStreet(this.formData.street, this.formData.unit);
 
     return {
       verified: true, confidenceScore: 93,
@@ -700,8 +695,8 @@ class AddressVerificationWidget {
       carrierRoute: country === 'NG' ? `NG-${state.slice(0, 3).toUpperCase()}-01` : 'INT-001',
       standardized: {
         street: stdStreet,
-        city:   (this.formData.city || '').trim().toUpperCase(),
-        state:  state.toUpperCase(),
+        city: (this.formData.city || '').trim().toUpperCase(),
+        state: state.toUpperCase(),
         zipcode: zip.toUpperCase(),
         country: countryName
       },
@@ -717,7 +712,7 @@ class AddressVerificationWidget {
       FLOOR: 'FL', SUITE: 'STE', APARTMENT: 'APT'
     };
     let s = (street || '').trim().toUpperCase();
-    let u = (unit   || '').trim().toUpperCase();
+    let u = (unit || '').trim().toUpperCase();
     for (const [k, v] of Object.entries(abbr)) {
       s = s.replace(new RegExp(`\\b${k}\\b`, 'g'), v);
       u = u.replace(new RegExp(`\\b${k}\\b`, 'g'), v);
@@ -733,19 +728,19 @@ class AddressVerificationWidget {
 
   reset() {
     if (this.stepTimer) { clearInterval(this.stepTimer); this.stepTimer = null; }
-    this.formData           = { street: '', unit: '', city: '', state: '', zipcode: '', country: this.defaultCountry };
-    this.validationErrors   = {};
+    this.formData = { street: '', unit: '', city: '', state: '', zipcode: '', country: this.defaultCountry };
+    this.validationErrors = {};
     this.verificationResult = null;
-    this.activePreset       = 'lagos';
+    this.activePreset = 'lagos';
     this.transitionToState('initiation');
   }
 
   getState() {
     return {
-      currentState:       this.currentState,
-      formData:           { ...this.formData },
+      currentState: this.currentState,
+      formData: { ...this.formData },
       verificationResult: this.verificationResult ? { ...this.verificationResult } : null,
-      timestamp:          new Date().toISOString()
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -759,7 +754,7 @@ class AddressVerificationWidget {
 
   escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 }
 
