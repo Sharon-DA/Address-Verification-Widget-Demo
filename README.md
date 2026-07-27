@@ -1,207 +1,198 @@
-# Standalone Address Verification Widget SDK
+# Address Verification Widget SDK
 
-**Designed & Developed by**: Sharon A
+**Designed & Developed by Sharon A**
 
-This is a lightweight, zero-dependency Vanilla JavaScript widget for address verification. Built as an encapsulated, embeddable component supporting **Nigerian (NIPOST)**, **US (USPS CASS/DPV)**, and **International** address verification. Designed to be integrated directly into web applications or packaged as a drop-in JavaScript library.
+A standalone, zero-dependency Vanilla JavaScript address verification widget. Supports **Nigerian (NIPOST)**, **US (USPS)**, and **International** postal formats. Built as a fully encapsulated, embeddable component — no frameworks, no build step required.
 
 ---
 
-## Technical Overview
+## Live Demo
 
-- **Zero External Dependencies**: Pure DOM manipulation, native ES6+ JavaScript, and Vanilla CSS design tokens.
-- **Three-State Workflow State Machine**:
-  - **Initiation State**: Multi-region postal input form with dynamic field rules, SVG input icons, real-time validation, and quick-test preset chips.
-  - **Loading / Verification State**: Multi-step animated progress sequence simulating CASS standardization, geocoding, and DPV database matching.
-  - **Result State**: Detailed match analysis displaying standardized postal address, carrier route code, delivery confidence match score, or diagnostic failure reasons.
-- **SDK Architecture**: Encapsulated component class with lifecycle event callbacks (`onStateChange`, `onVerificationComplete`), API methods (`getState()`, `setPreset()`, `reset()`, `destroy()`), ARIA accessibility compliance, and instant Dark/Light mode theme switching.
+Open `index.html` directly in any browser. The demo page includes:
+
+- The embedded widget (left column)
+- A real-time **Widget State Inspector** with a live JSON view and event log (right column)
+- Dark mode toggle
 
 ---
 
 ## File Structure
 
 ```
-address-verification-widget/
-├── index.html                 # Standalone demo web page with real-time state & event inspector
+address-ver-widget/
+├── index.html          — Standalone demo page with inspector sidebar
 ├── css/
-│   └── widget.css            # Component design system (CSS variables, animations, dark mode)
+│   └── widget.css      — Full design system: tokens, layout, animations, dark mode
 ├── js/
-│   ├── widget.js             # Core AddressVerificationWidget component class
-│   └── widget.d.ts           # TypeScript type declaration file for SDK consumers
-├── README.md                 # Technical documentation & library packaging guide
-└── .gitignore               # Version control exclusion rules
+│   ├── widget.js       — Core AddressVerificationWidget class (Vanilla JS)
+│   └── widget.d.ts     — TypeScript declarations for library consumers
+└── README.md
 ```
 
 ---
 
-## Quick Start Guide
+## Widget States
 
-### Direct HTML Integration
+The widget is a **3-state component** driven by an internal state machine:
 
-1. **Include CSS and JavaScript files:**
+### State 1 — Initiation (Address Form)
+
+- Country selector (Nigeria, US, UK, Canada, Germany) with flag indicator
+- Street Address, Apt/Suite, City/Town, State/Region, Postal Code fields
+- SVG icon for each input field
+- Real-time validation with inline error messages
+- **Quick Example chips**: Lagos, Nigeria · Abuja, Nigeria · New York, USA · London, UK · Random Address
+- Royal blue "Verify Address →" submit button
+- All fields match Nigerian (NIPOST) 6-digit postal codes and free-text state names
+
+### State 2 — Loading (Verification in Progress)
+
+- Dual-ring animated spinner
+- Animated step checklist:
+  1. Street address format — *Standardizing to postal conventions*
+  2. City and state lookup — *Querying location master files*
+  3. Postal code registry — *Validating delivery point*
+- Animated progress bar
+- Address preview pill showing input being verified
+
+### State 3 — Result
+
+**Verified:**
+- Animated success icon with pulse ring
+- Delivery Confidence score badge (e.g. 96%)
+- Standardized postal address card (street, city, state, postcode, country)
+- "Verified" green badge + carrier route reference
+- "Use This Address" button — copies to clipboard
+- "Verify Another" reset button
+
+**Unverified:**
+- Animated warning icon with pulse ring
+- "Could Not Be Verified" heading
+- Possible Issues list (invalid postcode, unknown street, missing building number)
+- Submitted address shown for review
+- "Edit Address" and "Verify Another" buttons
+
+---
+
+## Verification Logic
+
+The widget simulates a postal verification pipeline against a built-in mock database:
+
+- **Exact match**: Matches on postal code + street keyword → returns pre-defined standardized address with high confidence (96–99%)
+- **Generic match**: Any valid input that doesn't match the mock DB → returns a standardized version with 93% confidence
+- **Unverified**: Triggered by known invalid patterns (`nonexistent`, postal code `000000`, state containing `invalid`)
+
+**Street standardization** converts long-form suffixes to postal abbreviations:
+`STREET → ST`, `AVENUE → AVE`, `BOULEVARD → BLVD`, `FLOOR → FL`, `SUITE → STE`, etc.
+
+---
+
+## Embedding the Widget
+
+### Basic Integration
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Address Verification SDK Integration</title>
-  <link rel="stylesheet" href="css/widget.css">
-</head>
-<body>
-
-  <!-- Target Container Element -->
-  <div id="address-widget"></div>
-
-  <!-- Include Widget SDK -->
-  <script src="js/widget.js"></script>
-
-  <script>
-    // Instantiate Address Verification Widget
-    const widget = new AddressVerificationWidget({
-      containerId: 'address-widget',
-      defaultCountry: 'NG',
-      onVerificationComplete: (result) => {
-        if (result.verified) {
-          console.log('Verified Address:', result.standardized);
-          console.log('Match Confidence:', result.confidenceScore + '%');
-        } else {
-          console.log('Verification Failed:', result.issues);
-        }
-      },
-      onStateChange: (state) => {
-        console.log('Widget State Changed:', state.currentState);
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
-2. **Launch `index.html` in any web browser** to test the interactive demo and live JSON state inspector.
-
----
-
-## Component API Reference
-
-### Constructor Options (`AddressVerificationWidgetOptions`)
-
-```typescript
-new AddressVerificationWidget(options: AddressVerificationWidgetOptions);
-```
-
-| Option | Type | Required | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `containerId` | `string \| HTMLElement` | **Yes** | `undefined` | Target element ID string or HTMLElement reference where the widget mounts. |
-| `defaultCountry` | `string` | No | `'NG'` | ISO 2-letter default country selection (`'NG'`, `'US'`, `'GB'`, etc.). |
-| `onVerificationComplete` | `Function` | No | `null` | Callback executed upon completion (`(result: VerificationResult) => void`). |
-| `onStateChange` | `Function` | No | `null` | Callback executed on state transition (`(state: WidgetStateSnapshot) => void`). |
-| `autoFocus` | `boolean` | No | `true` | Automatically focuses the street address input field on initiation. |
-| `simulateLatencyMs` | `number` | No | `2000` | Simulated backend network latency in milliseconds. |
-
----
-
-### Core SDK Methods
-
-| Method | Return Type | Description |
-| :--- | :--- | :--- |
-| `init()` | `void` | Mounts component structure into the target container and renders initiation state. |
-| `render()` | `void` | Renders view elements corresponding to the active state (`initiation`, `loading`, `result`). |
-| `transitionToState(newState)` | `void` | Changes widget state programmatically and triggers re-render. |
-| `setPreset(data)` | `void` | Pre-fills form input fields with specified address object. |
-| `validateFormData()` | `boolean` | Validates required inputs according to regional rules (e.g. 5-6 digit postal code for NG/US). |
-| `performVerification()` | `void` | Runs asynchronous verification pipeline sequence. |
-| `computeVerificationResult(data)` | `VerificationResult` | Computes match score against mock postal database entries. |
-| `copyStandardizedAddress()` | `void` | Copies the formatted standardized address text to the user's clipboard. |
-| `reset()` | `void` | Resets widget internal state, clears inputs, and returns to initiation state. |
-| `getState()` | `WidgetStateSnapshot` | Returns current snapshot `{ currentState, formData, verificationResult }`. |
-| `destroy()` | `void` | Unmounts DOM elements, clears active timers, and removes event listeners. |
-
----
-
-## State Machine Architecture
-
-```
-                       ┌─────────────────────────┐
-                       │    Initiation State     │
-                       │  (Address Input Form)   │
-                       └───────────┬─────────────┘
-                                   │
-                           Submit & Validate
-                                   │
-                                   ▼
-                       ┌─────────────────────────┐
-                       │      Loading State      │
-                       │ (Multi-step Verification)│
-                       └───────────┬─────────────┘
-                                   │
-                           Complete (2000ms)
-                                   │
-                                   ▼
-                       ┌─────────────────────────┐
-                       │      Result State       │
-                       │ (Verified / Unverified) │
-                       └───────────┬─────────────┘
-                                   │
-                        Verify Another / Reset
-                                   │
-                                   └─────────► (Back to Initiation)
-```
-
----
-
-## Packaging as a Drop-In JavaScript Library
-
-To package and distribute this SDK for external web applications or package registries:
-
-### 1. Direct CDN / UMD Script Tag Distribution
-
-Bundle and minify `js/widget.js` and `css/widget.css` using standard build tooling (e.g., Vite, Esbuild, or Rollup):
-
-```html
-<link rel="stylesheet" href="https://cdn.orgbyte.com/address-widget.min.css">
-<script src="https://cdn.orgbyte.com/address-widget.min.js"></script>
-
-<div id="checkout-address-widget"></div>
+<link rel="stylesheet" href="css/widget.css">
+<div id="address-widget"></div>
+<script src="js/widget.js"></script>
 <script>
   const widget = new AddressVerificationWidget({
-    containerId: 'checkout-address-widget',
-    defaultCountry: 'NG'
+    containerId: 'address-widget',
+    defaultCountry: 'NG',
+    onVerificationComplete: (result) => {
+      if (result.verified) {
+        console.log('Address:', result.standardized);
+        console.log('Confidence:', result.confidenceScore + '%');
+      } else {
+        console.log('Failed:', result.message);
+      }
+    },
+    onStateChange: (state) => {
+      console.log('State changed to:', state.currentState);
+    }
   });
 </script>
 ```
 
-### 2. NPM Package Module Distribution
+---
 
-Define `package.json` package manifest for NPM:
+## Constructor Options
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `containerId` | `string \| HTMLElement` | **required** | ID string or element reference where the widget mounts |
+| `defaultCountry` | `string` | `'NG'` | ISO 2-letter default country code |
+| `onVerificationComplete` | `function` | `null` | Called when verification finishes — receives `VerificationResult` |
+| `onStateChange` | `function` | `null` | Called on every state transition — receives `WidgetStateSnapshot` |
+| `autoFocus` | `boolean` | `true` | Auto-focuses the street field on load |
+
+---
+
+## Instance Methods
+
+| Method | Returns | Description |
+| :--- | :--- | :--- |
+| `getState()` | `WidgetStateSnapshot` | Current state, form data, and verification result |
+| `setPreset(data)` | `void` | Pre-fills form fields with an address object |
+| `reset()` | `void` | Clears form and returns to initiation state |
+| `transitionToState(state)` | `void` | Programmatically switch to `'initiation'`, `'loading'`, or `'result'` |
+| `destroy()` | `void` | Unmounts widget, clears timers, removes DOM |
+
+---
+
+## State Machine
+
+```
+┌─────────────────────┐
+│   Initiation State  │  ← User fills in address fields
+│   (Address Form)    │
+└──────────┬──────────┘
+           │  Submit (validates first)
+           ▼
+┌─────────────────────┐
+│    Loading State    │  ← Step-by-step animated verification
+│  (3-step pipeline)  │
+└──────────┬──────────┘
+           │  Complete (~2s)
+           ▼
+┌─────────────────────┐
+│    Result State     │  ← Verified or Unverified result card
+│ (Verified/Unverified│
+└──────────┬──────────┘
+           │  "Verify Another" or "Edit Address"
+           └──────────────────────────────────► Back to Initiation
+```
+
+---
+
+## Packaging as a Drop-In Library
+
+To package and distribute this SDK for external web applications or package registries:
+
+### Option 1 — CDN Script Tag
+
+Minify `widget.js` and `widget.css` with any bundler (Esbuild, Rollup, Vite) and serve via CDN:
+
+```html
+<link rel="stylesheet" href="https://cdn.example.com/address-widget.min.css">
+<script src="https://cdn.example.com/address-widget.min.js"></script>
+```
+
+The widget registers itself on `window.AddressVerificationWidget` automatically.
+
+### Option 2 — NPM Package
+
+Add a `package.json` and publish to the NPM registry:
 
 ```json
 {
-  "name": "@orgbyte/address-verification-widget",
+  "name": "address-verification-widget",
   "version": "1.0.0",
-  "description": "Standalone Vanilla JS Address Verification Widget SDK",
   "main": "js/widget.js",
   "types": "js/widget.d.ts",
   "style": "css/widget.css",
-  "files": [
-    "js/",
-    "css/"
-  ],
-  "keywords": [
-    "address-verification",
-    "vanilla-js",
-    "nipost",
-    "usps",
-    "cass",
-    "dpv",
-    "sdk"
-  ]
+  "files": ["js/", "css/"]
 }
-```
-
-Installation and Import Usage:
-
-```bash
-npm install @orgbyte/address-verification-widget
 ```
 
 ```javascript
@@ -218,35 +209,47 @@ const widget = new AddressVerificationWidget({
 });
 ```
 
----
+### TypeScript Support
 
-## TypeScript Declarations (`widget.d.ts`)
-
-The project includes full TypeScript typings (`js/widget.d.ts`) allowing TypeScript projects to consume the widget with type safety and IntelliSense completion:
+Full type declarations are included in `js/widget.d.ts`:
 
 ```typescript
-import { AddressVerificationWidget, VerificationResult } from '@orgbyte/address-verification-widget';
+import { AddressVerificationWidget, VerificationResult } from 'address-verification-widget';
 
 const widget = new AddressVerificationWidget({
   containerId: 'address-widget',
   onVerificationComplete: (result: VerificationResult) => {
-    console.log(`Verified status: ${result.verified}`);
+    console.log(result.verified, result.confidenceScore);
   }
 });
 ```
 
 ---
 
-## Browser Support & Accessibility
+## Preset Address Data
 
-- **Browsers**: Chrome, Firefox, Safari, Edge (Modern Evergreen Browsers).
-- **Accessibility**:
-  - ARIA attributes (`aria-live="polite"`, `aria-invalid`, `aria-describedby`).
-  - Screen-reader text labels.
-  - Keyboard navigation and focus rings (`:focus-visible`).
+The widget ships with four built-in test addresses:
+
+| Chip | Address | Postcode | Result |
+| :--- | :--- | :--- | :--- |
+| Lagos, Nigeria | 15 Commercial Avenue, Suite 3B, Yaba | 100001 | ✅ Verified — 98% |
+| Abuja, Nigeria | 42 Ahmadu Bello Way, Floor 4, CBD | 900001 | ✅ Verified — 96% |
+| New York, USA | 350 Fifth Avenue, Floor 102 | 10118 | ✅ Verified — 97% |
+| London, UK | 10 Downing Street, Westminster | SW1A 2AA | ✅ Verified — 99% |
+| Random Address | 742 Evergreen Terrace, Springfield, Oregon | 97477 | ✅ Verified — 93% |
+
+Enter any address not in the above list with a valid postal code to get a generic 93% confidence match. Enter an address with postal code `000000` or containing "nonexistent" for an unverified result.
+
+---
+
+## Browser Support
+
+Chrome, Firefox, Safari, Edge — all modern evergreen browsers. No polyfills required.
+
+**Accessibility:** ARIA live regions, `aria-invalid`, keyboard focus rings (`:focus-visible`), screen-reader labels.
 
 ---
 
 ## License
 
-MIT License
+MIT — Sharon A, 2026
