@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Address Verification Widget - Standalone Vanilla JS Demo</title>
+  <meta name="description" content="A lightweight, zero-dependency address verification component written in Vanilla JavaScript and CSS.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Widget Styling -->
+  <link rel="stylesheet" href="css/widget.css">
+
+  <style>
+    /* Demo Page Layout Styles */
+    :root {
+      --demo-bg: #F1F5F9;
+      --demo-text: #0F172A;
+      --demo-card-bg: #FFFFFF;
+      --demo-border: #E2E8F0;
+      --demo-muted: #64748B;
+      --demo-primary: #1D4ED8;
+    }
+
+    [data-theme="dark"] {
+      --demo-bg: #0F172A;
+      --demo-text: #F8FAFC;
+      --demo-card-bg: #1E293B;
+      --demo-border: #334155;
+      --demo-muted: #94A3B8;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--demo-bg);
+      color: var(--demo-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Page Header */
+    .demo-header-outer {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px 20px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .demo-brand-area {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .demo-logo-box {
+      width: 56px;
+      height: 56px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .demo-logo-box {
+      background: #1E293B;
+      border-color: #334155;
+    }
+
+    .demo-title-area h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--demo-text);
+      margin: 0 0 6px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .demo-title-area p {
+      font-size: 0.9375rem;
+      color: var(--demo-muted);
+      margin: 0 0 14px 0;
+      line-height: 1.45;
+      max-width: 620px;
+    }
+
+    .demo-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .demo-badge-blue {
+      background: #1D4ED8;
+      color: #FFFFFF;
+    }
+
+    .demo-badge-grey {
+      background: #E2E8F0;
+      color: #334155;
+    }
+    [data-theme="dark"] .demo-badge-grey {
+      background: #334155;
+      color: #E2E8F0;
+    }
+
+    .demo-badge-pink {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #DC2626;
+    }
+    [data-theme="dark"] .demo-badge-pink {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(252, 165, 165, 0.3);
+      color: #FCA5A5;
+    }
+
+    /* Dark Mode Button Top Right */
+    .theme-toggle-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--demo-border);
+      color: var(--demo-text);
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn {
+      background: #1E293B;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: #1D4ED8;
+      color: #1D4ED8;
+    }
+
+    /* Main Grid Layout */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 10px 24px 40px;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .demo-header-outer {
+        flex-direction: column;
+      }
+    }
+
+    /* Right Column: Inspector Card */
+    .inspector-card {
+      background: var(--demo-card-bg);
+      border: 1px solid var(--demo-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .inspector-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--demo-text);
+    }
+
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #DC2626;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #DC2626;
+      box-shadow: 0 0 8px #DC2626;
+      animation: livePulse 2s infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Inspector Tabs */
+    .inspector-tabs {
+      display: flex;
+      background: #F1F5F9;
+      padding: 3px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    [data-theme="dark"] .inspector-tabs {
+      background: #0F172A;
+    }
+
+    .inspector-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--demo-muted);
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .inspector-tab-active {
+      background: #FFFFFF;
+      color: var(--demo-text);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] .inspector-tab-active {
+      background: #1E293B;
+      color: #F8FAFC;
+    }
+
+    /* Code Box */
+    .code-box-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    pre.json-inspector {
+      background: #111827;
+      color: #38BDF8;
+      padding: 16px;
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: 0;
+      max-height: 240px;
+    }
+
+    .code-copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94A3B8;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .code-copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+    }
+
+    /* Recent Events Section */
+    .recent-events-section {
+      border-top: 1px solid var(--demo-border);
+      padding-top: 16px;
+    }
+
+    .events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .events-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--demo-text);
+    }
+
+    .clear-btn {
+      background: transparent;
+      border: 1px solid var(--demo-border);
+      color: var(--demo-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: #FEF2F2;
+      border-color: #FECACA;
+      color: #DC2626;
+    }
+
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .event-item {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px;
+      background: #F8FAFC;
+      border-left: 3px solid #1D4ED8;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.75rem;
+    }
+
+    [data-theme="dark"] .event-item {
+      background: #0F172A;
+    }
+
+    .event-item-blue  { border-left-color: #1D4ED8; }
+    .event-item-red   { border-left-color: #DC2626; }
+    .event-item-green { border-left-color: #10B981; }
+
+    .event-time {
+      font-size: 0.6875rem;
+      color: var(--demo-muted);
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .event-msg {
+      font-weight: 600;
+      color: var(--demo-text);
+    }
+
+    .event-detail {
+      font-size: 0.6875rem;
+      color: var(--demo-muted);
+      margin-top: 1px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8125rem;
+      color: var(--demo-muted);
+      border-top: 1px solid var(--demo-border);
+      background: var(--demo-card-bg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo Header Outer -->
+  <div class="demo-header-outer">
+    <div class="demo-brand-area">
+      <div class="demo-logo-box">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="#DC2626" stroke="none"></path>
+          <circle cx="12" cy="12" r="2" fill="#FFFFFF"></circle>
+        </svg>
+      </div>
+      <div class="demo-title-area">
+        <h1>Address Verification</h1>
+        <p>A lightweight, embeddable component that verifies addresses using simulated NIPOST, USPS and international validation.</p>
+        <div class="demo-badges">
+          <span class="demo-badge demo-badge-blue">Vanilla JS</span>
+          <span class="demo-badge demo-badge-grey">No Dependencies</span>
+          <span class="demo-badge demo-badge-pink">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+            Embeddable Component
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme Toggle Top Right -->
+    <button class="theme-toggle-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <span id="theme-icon-container">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </span>
+      <span id="theme-label">Dark Mode</span>
+    </button>
+  </div>
+
+  <!-- Main Demo Content Grid -->
+  <main>
+    <!-- Left Column: Address Verification Widget Container -->
+    <section>
+      <div id="address-widget"></div>
+    </section>
+
+    <!-- Right Column: Widget Inspector Sidebar -->
+    <aside>
+      <div class="inspector-card">
+        <div class="inspector-header">
+          <span class="inspector-title">Widget Inspector</span>
+          <div class="live-status">
+            <div class="live-dot"></div>
+            <span>Live</span>
+          </div>
+        </div>
+
+        <!-- Inspector Tabs -->
+        <div class="inspector-tabs">
+          <button class="inspector-tab inspector-tab-active" id="tab-json" type="button">JSON State</button>
+          <button class="inspector-tab" id="tab-events" type="button">Events Log</button>
+        </div>
+
+        <!-- Code Box View -->
+        <div class="code-box-wrap" id="view-json">
+          <button class="code-copy-btn" id="copy-json-btn" type="button" title="Copy JSON state">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <pre class="json-inspector" id="json-display">{ "currentState": "initiation" }</pre>
+        </div>
+
+        <!-- Recent Events Section -->
+        <div class="recent-events-section">
+          <div class="events-header">
+            <span class="events-title">Recent Events</span>
+            <button class="clear-btn" id="clear-events-btn" type="button">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Clear
+            </button>
+          </div>
+          <div class="event-list" id="event-list">
+            <!-- Dynamically populated events -->
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Designed &amp; Built by Sharon A &bull; Standalone Address Verification Widget SDK
+  </footer>
+
+  <!-- Include Widget JavaScript -->
+  <script src="js/widget.js"></script>
+
+  <!-- Demo Page Initialization & Inspector Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const jsonDisplay = document.getElementById('json-display');
+      const eventList   = document.getElementById('event-list');
+
+      function logEvent(msg, type = 'blue', detail = '') {
+        const item = document.createElement('div');
+        item.className = `event-item event-item-${type}`;
+        const time = new Date().toLocaleTimeString();
+        item.innerHTML = `
+          <span class="event-time">${time}</span>
+          <span class="event-msg">${msg}</span>
+          ${detail ? `<span class="event-detail">${detail}</span>` : ''}
+        `;
+        eventList.prepend(item);
+      }
+
+      // Initial events
+      logEvent('Widget mounted in #address-widget', 'blue');
+      logEvent('Ready for verification', 'green');
+
+      // Instantiate AddressVerificationWidget
+      const widget = new AddressVerificationWidget({
+        containerId: 'address-widget',
+        defaultCountry: 'NG',
+        onStateChange: (state) => {
+          updateInspector();
+          if (state.currentState === 'loading') {
+            logEvent('Verification started', 'red');
+          }
+        },
+        onVerificationComplete: (result) => {
+          updateInspector();
+          if (result.verified) {
+            logEvent('Address Verified Successfully', 'green', `Confidence: ${result.confidenceScore}%`);
+          } else {
+            logEvent('Address Could Not Be Verified', 'red', result.message || '');
+          }
+        }
+      });
+
+      // Update Inspector view
+      function updateInspector() {
+        const state = widget.getState();
+        jsonDisplay.textContent = JSON.stringify(state, null, 2);
+      }
+
+      // Copy JSON button listener
+      document.getElementById('copy-json-btn').addEventListener('click', () => {
+        const text = jsonDisplay.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById('copy-json-btn');
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          setTimeout(() => {
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+          }, 1500);
+        });
+      });
+
+      // Clear events listener
+      document.getElementById('clear-events-btn').addEventListener('click', () => {
+        eventList.innerHTML = '';
+      });
+
+      // Tab switcher listener
+      const tabJson   = document.getElementById('tab-json');
+      const tabEvents = document.getElementById('tab-events');
+      const viewJson  = document.getElementById('view-json');
+
+      tabJson.addEventListener('click', () => {
+        tabJson.classList.add('inspector-tab-active');
+        tabEvents.classList.remove('inspector-tab-active');
+        viewJson.style.display = 'block';
+      });
+
+      tabEvents.addEventListener('click', () => {
+        tabEvents.classList.add('inspector-tab-active');
+        tabJson.classList.remove('inspector-tab-active');
+        viewJson.style.display = 'none';
+      });
+
+      // Initial inspect update
+      updateInspector();
+
+      // Dark Mode Toggle
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeIconContainer = document.getElementById('theme-icon-container');
+      const themeLabel = document.getElementById('theme-label');
+
+      const moonSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      const sunSvg  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+      let isDark = false;
+      themeToggleBtn.addEventListener('click', () => {
+        isDark = !isDark;
+        if (isDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          themeIconContainer.innerHTML = sunSvg;
+          themeLabel.textContent = 'Light Mode';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          themeIconContainer.innerHTML = moonSvg;
+          themeLabel.textContent = 'Dark Mode';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
