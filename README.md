@@ -26,7 +26,8 @@ A lightweight, standalone address verification component built with **Vanilla Ja
 address-ver-widget/
 ├── index.html          # Standalone demo web page with live inspector
 ├── css/
-│   └── widget.css      # Component stylesheet (design system, dark mode)
+│   ├── base.css         # Base/reset styles and shared design tokens
+│   └── widget.css       # Component stylesheet (design system, dark mode)
 ├── js/
 │   ├── widget.js       # Encapsulated AddressVerificationWidget class
 │   └── widget.d.ts     # TypeScript type definitions
@@ -42,6 +43,7 @@ Open `index.html` directly in any web browser to view the interactive demo.
 ### Basic Integration Example
 
 ```html
+<link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/widget.css">
 
 <!-- Container where the widget mounts -->
@@ -92,9 +94,10 @@ Open `index.html` directly in any web browser to view the interactive demo.
 
 ### Option 1: Direct CDN Integration
 
-Host minified `widget.js` and `widget.css` on a CDN (or load via jsDelivr from GitHub):
+Host minified `widget.js`, `widget.css`, and `base.css` on a CDN (or load via jsDelivr from GitHub):
 
 ```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Sharon-DA/Address-Verification-Widget-Demo@main/css/base.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Sharon-DA/Address-Verification-Widget-Demo@main/css/widget.css">
 <script src="https://cdn.jsdelivr.net/gh/Sharon-DA/Address-Verification-Widget-Demo@main/js/widget.js"></script>
 
@@ -127,6 +130,7 @@ npm install @sharon-da/address-verification-widget
 
 ```javascript
 import AddressVerificationWidget from '@sharon-da/address-verification-widget';
+import '@sharon-da/address-verification-widget/css/base.css';
 import '@sharon-da/address-verification-widget/css/widget.css';
 
 const widget = new AddressVerificationWidget({
